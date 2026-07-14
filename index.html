@@ -10,11 +10,11 @@
 
     <div class="max-w-2xl w-full bg-white rounded-xl shadow-md p-8 border border-gray-100">
         <h1 class="text-3xl font-bold text-gray-800 mb-2">🔍 Open Plagiatsprüfer</h1>
-        <p class="text-gray-500 mb-6">Lade deine Arbeit als <code class="bg-gray-100 px-1 py-0.5 rounded">.txt</code>-Datei hoch, um sie gegen das Web und wissenschaftliche Portale zu prüfen.</p>
+        <p class="text-gray-500 mb-6">Lade deine Arbeit als <code class="bg-gray-100 px-1 py-0.5 rounded">.pdf</code> oder <code class="bg-gray-100 px-1 py-0.5 rounded">.txt</code>-Datei hoch, um sie gegen das Web und wissenschaftliche Portale zu prüfen.</p>
 
         <div class="mb-6">
-            <label class="block mb-2 text-sm font-medium text-gray-700">Wähle eine TXT-Datei:</label>
-            <input type="file" id="fileInput" accept=".txt" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+            <label class="block mb-2 text-sm font-medium text-gray-700">Wähle ein Dokument:</label>
+            <input type="file" id="fileInput" accept=".pdf,.txt" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
         </div>
 
         <button onclick="uploadAndScan()" id="scanBtn" class="w-full bg-blue-600 text-white font-medium py-3 px-4 rounded-md hover:bg-blue-700 transition duration-150">
@@ -23,7 +23,7 @@
 
         <div id="loading" class="hidden mt-6 text-center">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p class="text-blue-600 mt-2 font-medium">Prüfe Quellen... Dies kann bis zu einer Minute dauern.</p>
+            <p class="text-blue-600 mt-2 font-medium">Extrahiere Text und prüfe Quellen... Dies kann bis zu einer Minute dauern.</p>
         </div>
 
         <div id="error" class="hidden mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md"></div>
@@ -36,7 +36,7 @@
 
     <script>
         // Ersetze diese URL mit deiner echten Render-URL nach dem Deployment!
-        const BACKEND_URL = "https://plagiarism-checker-backend-pys2.onrender.com";
+        const BACKEND_URL = "https://plagiarism-checker-backend.onrender.com";
 
         async function uploadAndScan() {
             const fileInput = document.getElementById('fileInput');
@@ -46,7 +46,6 @@
             const matchList = document.getElementById('matchList');
             const errorDiv = document.getElementById('error');
 
-            // Reset UI
             errorDiv.classList.add('hidden');
             resultsDiv.classList.add('hidden');
             matchList.innerHTML = '';
@@ -60,7 +59,6 @@
             const formData = new FormData();
             formData.append('file', file);
 
-            // UI in "Laden"-Zustand versetzen
             scanBtn.disabled = true;
             scanBtn.classList.add('opacity-50');
             loading.classList.remove('hidden');
@@ -82,11 +80,15 @@
                     data.matches.forEach(match => {
                         const item = document.createElement('div');
                         item.className = "p-4 bg-yellow-50 border border-yellow-200 rounded-md";
+                        // Extrahiere URL sauber aus dem String falls vorhanden
+                        const urlMatch = match.source.match(/\((https?:\/\/[^\s)]+)\)/);
+                        const cleanUrl = urlMatch ? urlMatch[1] : "#";
+
                         item.innerHTML = `
                             <div class="flex justify-between items-center mb-1">
                                 <span class="font-bold text-yellow-800">⚠️ ${match.score}% Übereinstimmung</span>
                             </div>
-                            <a href="${match.source.split('(').pop().replace(')', '')}" target="_blank" class="text-blue-600 hover:underline text-sm break-all">
+                            <a href="${cleanUrl}" target="_blank" class="text-blue-600 hover:underline text-sm break-all">
                                 ${match.source}
                             </a>
                         `;
